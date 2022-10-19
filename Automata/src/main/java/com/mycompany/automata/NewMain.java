@@ -11,7 +11,7 @@ public class NewMain {
     public static void main(String[] args) {
         
         String cadena="REalhaaahacerhacEr aaaleer";
-        cadena+=" "; //necesario para un método de comprobar Tokens (encontrarErroresYOrganizarTokens)
+
         
         ComprobadorTokens c =new ComprobadorTokens();
 
@@ -35,9 +35,11 @@ public class NewMain {
         m_real.direccionarApartado(cadena);
         m_hacer.direccionarApartado(cadena);
         
+        
         c.verListas();
         
         
-    }
+        
     
+    }
 }

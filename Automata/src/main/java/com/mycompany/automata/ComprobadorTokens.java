@@ -10,6 +10,7 @@ public class ComprobadorTokens {
     private ArrayList<ArrayList<Integer>> listasBooleanos;
     private ArrayList<ArrayList<ArrayList<Integer>>> listasPosiciones;
     private ArrayList<ArrayList<Integer>> listasNumAutomata;
+    private ArrayList<Integer> listasOrdenadasNumAutomata;
     private ArrayList<Character> errores;
     private ArrayList<Integer> posicionesErrores;
     private ArrayList<String> validas;
@@ -21,6 +22,7 @@ public class ComprobadorTokens {
         listasBooleanos= new ArrayList<>();
         listasPosiciones= new ArrayList<>();
         listasNumAutomata= new ArrayList<>();
+        listasOrdenadasNumAutomata= new ArrayList<>();
         todoJunto= new ArrayList<>();
         errores= new ArrayList<>();
         validas= new ArrayList<>();
@@ -66,68 +68,85 @@ public class ComprobadorTokens {
     
     public void verListas(){
         if(!listasBooleanos.isEmpty()){
-            //para que no salte en el apartado 1
-           encontrarErroresYOrganizarTokens();
-            System.out.println(listasValidas);
-            System.out.println(listasBooleanos);
-            System.out.println(listasPosiciones);
-            System.out.println(listasNumAutomata);
-            System.out.println(errores);
-            System.out.println(todoJunto); 
+            definirPosicionesErrores();
+            organizarTokens();
+//            System.out.println(listasValidas);
+//            System.out.println(listasPosiciones);
+//            System.out.println(listasNumAutomata);
+//            System.out.println(listasBooleanos);
+//            System.out.println(errores);
+//            System.out.println(posicionesErrores);
+//            System.out.println(todoJunto); 
+//            System.out.println(listasOrdenadasNumAutomata);
+            imprimir();
         }
         
     }
-        
-        
-//    public void imprimirListas(){
-//        if(!errores.isEmpty()){
-//            for (char i:errores){
-//                System.out.println("<'"+i+"', error>");
-//            }
-//            }
-//        if(!validas.isEmpty()){
-//            for (String i:validas){
-//                System.out.println("<'"+i+"', Token>");
-//            }
-//        }
-//    }
     
     
-    public void encontrarErroresYOrganizarTokens(){
-        //esta función es un intento de imprimir las cosas ordenadas pero sin hacer uso de
-        //las listas de localizaciones ni palabras válidas previamente guardadas
+    
+    public void definirPosicionesErrores(){
         int sumador=0;
-        String intermedia="";
         for(int i=0;i<listasBooleanos.get(0).size();i++){
             for(ArrayList<Integer> a:listasBooleanos){
                 sumador+=a.get(i);
             } 
-            switch (sumador) {
-                case 0:
-                    
-                    if(intermedia!=""){
-                        //caso de que intermedia haya sido rellenado, se añade, ya que será
-                        //un token válido y se vuelve a vaciar para el siguiente
-                        todoJunto.add(intermedia);
-                        intermedia="";
-                    }
-                    else{
-                        errores.add(cadena.charAt(i));
-                        todoJunto.add(String.valueOf(cadena.charAt(i)));
-                        posicionesErrores.add(i);
-                    }
-                    break;
-                case 1:
-                    intermedia+=cadena.charAt(i);
-                    
-                    break;
-                default:
-                    break;
+          
+            if (sumador==0) {
+                errores.add(cadena.charAt(i));
+                posicionesErrores.add(i);
             }
             sumador=0;
-        }
         
+        }
     }
     
+    
+    public void organizarTokens(){
+        for(int posicion=0;posicion<cadena.length();posicion++){
+            boolean flag=false;
+            int contador=0;
+            for(int n: posicionesErrores){
+                if(posicion==n && !flag){
+                    todoJunto.add(String.valueOf(errores.get(contador)));
+                    flag=true;
+                }
+                contador++;
+            }
+            
+            if(!flag){
+                int posArray1=0;
+                
+                for (ArrayList<ArrayList<Integer>> a: listasPosiciones){
+                    int posArray2=0;
+                    for (ArrayList<Integer> b: a){
+                        
+                        if(b.get(0)==posicion){
+                            todoJunto.add(listasValidas.get(posArray1).get(posArray2));
+                            listasOrdenadasNumAutomata.add(listasNumAutomata.get(posArray1).get(posArray2));
+                            int desplazamiento=(listasPosiciones.get(posArray1).get(posArray2).get(1)-listasPosiciones.get(posArray1).get(posArray2).get(0));
+                            posicion=posicion+desplazamiento; //le sumamos a i, el número de caracteres de la palabra aceptada
+                        }
+                        posArray2++;
+                    }
+                    posArray1++;
+                }
+            }
+        }
+    }
+    
+    public void imprimir(){
+        int contadorBuenas=0;
+        for(String s: todoJunto){
+            if(s.length()==1){
+                System.out.println("<"+s+", ERROR>");
+            }
+            else{
+                System.out.println("<"+s+", M"+listasOrdenadasNumAutomata.get(contadorBuenas)+">");
+                contadorBuenas++;
+            }
+        }
+    }
+        
     
 }
