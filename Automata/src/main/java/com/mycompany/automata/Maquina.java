@@ -16,8 +16,7 @@ public class Maquina {
     private ComprobadorTokens comp;
     private ArrayList<Integer> listaNumAut;
     private ArrayList<ArrayList<Integer>> listaPosChar;
-    private ArrayList<Integer> intermedio;
-    private ArrayList<Integer> copia;
+
     private int numAut;
     private int posicionChar;
     private String cadenaM;
@@ -27,8 +26,6 @@ public class Maquina {
         afd.inicializadorDeTodo();
         this.comp=comp;
         validas= new ArrayList<>();
-        intermedio= new ArrayList<>();
-        copia= new ArrayList<>();
         listaBooleanos= new ArrayList<>();
         listaNumAut= new ArrayList<>();
         listaPosChar= new ArrayList<>();
@@ -48,16 +45,26 @@ public class Maquina {
         return afd.isFinal(estadoActual);
     }
     
-    public boolean acepta(char caracter){
+    public boolean acepta(char caracter, boolean bool){
         //devuelve un booleano que nos indica si el caracter recibido por parámetro
         //es válido y coherente con lo anterior
+        // tiene dos modos, si bool es false tan sólo comprueba si el siguiente caracter
+        // sería congruente con la cadena, pero si bool es true, ademas en caso de ser congruente
+        //cambia el estado actual ya que reconoce el caracter
         Integer estadoTemporal= afd.getSiguienteEstado(caracter, estadoActual);
-        if(estadoTemporal!=null){
-            estadoActual=estadoTemporal;
-            return true;
-        }else{
-            return false;
+        
+        if(bool){
+            if(estadoTemporal!=null){
+                estadoActual=estadoTemporal;
+                return true;
+            }else{
+                return false;
+            }
         }
+        else{
+            return estadoTemporal!=null;
+        }
+        
     }
 
     public void compruebaCadenaBuena(String cadena){
@@ -69,10 +76,12 @@ public class Maquina {
         boolean valida=false;
         int contador=0;
         int contador_errores=0;
+        ArrayList<Integer> intermedio= new ArrayList<>();
+        ArrayList<Integer> copia;
         
         if(cadena.length()>0){
             for(char c:cadena.toCharArray()){
-                if(this.acepta(c)){contador++;}
+                if(this.acepta(c,true)){contador++;}
 
                 else{
                     if(!valida){
@@ -83,9 +92,9 @@ public class Maquina {
                         }
                     }
                     preparacionCadena(cadena.substring(contador_errores, cadena.length()));
-                    //break;
                     return;
                 }
+                
                 if (isFinal()){
                     validas.add(cadena.substring(0, contador));
                     listaNumAut.add(numAut);
@@ -95,7 +104,7 @@ public class Maquina {
                         listaBooleanos.add(1);
                     }
                     //añado a (intermedio) la posicion del primer y ultimo caracter de la cadena valida
-                    //y para guardarlo en una lista de listas (listaPosChar), lengo que hacer una copia, meter la copia
+                    //y para guardarlo en una lista de listas (listaPosChar), tengo que hacer una copia, meter la copia
                     //y luego borrar los elementos de la lista intermedia
                     intermedio.add(posicionChar-1);
                     copia=(ArrayList<Integer>) intermedio.clone();
@@ -105,10 +114,12 @@ public class Maquina {
                     valida=true;
                 }
                 
-                if(valida && contador<cadena.length()){
+                
+                if(valida && contador<cadena.length() && contador<cadena.length() && !acepta(cadena.toCharArray()[contador],false) ){
                     preparacionCadena(cadena.substring(contador, cadena.length()));
                     break;
-                }
+                } 
+                
             }     
         }
         
@@ -142,7 +153,7 @@ public class Maquina {
         }
         
         if(cadena.length()>0){
-            if(this.acepta(cadena.toCharArray()[0])){compruebaCadenaBuena(cadena);}
+            if(this.acepta(cadena.toCharArray()[0],true)){compruebaCadenaBuena(cadena);}
             else{
                 posicionChar++;
                 listaBooleanos.add(0);
@@ -171,7 +182,7 @@ public class Maquina {
             
             for(char c:cadena.toCharArray()){
                 longitud++;
-                this.acepta(c);
+                this.acepta(c,true);
                 
                 if(longitud==cadena.length() && isFinal() ){
                     valida=true;

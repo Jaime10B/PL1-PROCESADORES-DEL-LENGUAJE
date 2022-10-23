@@ -2,13 +2,14 @@
 package com.mycompany.automata;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 
 public class ComprobadorTokens {
     
     private ArrayList<ArrayList<String>> listasValidas;
     private ArrayList<ArrayList<Integer>> listasBooleanos;
-    private ArrayList<ArrayList<ArrayList<Integer>>> listasPosiciones;
+    private ArrayList<ArrayList<ArrayList<Integer>>> listasPosicionesValidas;
     private ArrayList<ArrayList<Integer>> listasNumAutomata;
     private ArrayList<Integer> listasOrdenadasNumAutomata;
     private ArrayList<Character> errores;
@@ -20,7 +21,7 @@ public class ComprobadorTokens {
     public ComprobadorTokens() {
         listasValidas= new ArrayList<>();
         listasBooleanos= new ArrayList<>();
-        listasPosiciones= new ArrayList<>();
+        listasPosicionesValidas= new ArrayList<>();
         listasNumAutomata= new ArrayList<>();
         listasOrdenadasNumAutomata= new ArrayList<>();
         todoJunto= new ArrayList<>();
@@ -47,7 +48,7 @@ public class ComprobadorTokens {
     
     public void añadirAListasPosiciones(ArrayList<ArrayList<Integer>> lista) {
         if(!lista.isEmpty()){
-            listasPosiciones.add(lista);
+            listasPosicionesValidas.add(lista);
         }
         
     }
@@ -69,9 +70,10 @@ public class ComprobadorTokens {
     public void verListas(){
         if(!listasBooleanos.isEmpty()){
             definirPosicionesErrores();
+            detectarOverlapping();
             organizarTokens();
 //            System.out.println(listasValidas);
-//            System.out.println(listasPosiciones);
+//            System.out.println(listasPosicionesValidas);
 //            System.out.println(listasNumAutomata);
 //            System.out.println(listasBooleanos);
 //            System.out.println(errores);
@@ -101,30 +103,96 @@ public class ComprobadorTokens {
         }
     }
     
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void detectarOverlapping(){
+        //miro a ver si hay alguna cadena válida que empieza en el mismo punto que otra
+        //si esto ocurre llamaré a otros métodos para detectar cuál es la más corta y borrarla
+        ArrayList<Integer> posComienzo= new ArrayList<>() ;
+        ArrayList<Integer> posFinal= new ArrayList<>() ;
+    
+        for (ArrayList<ArrayList<Integer>> a: listasPosicionesValidas){
+                    for (ArrayList<Integer> b: a){
+                        //comprobamos si la posición de inicio ya está en la lista, en cuyo caso deberemos actuar
+                        if(posComienzo.indexOf(b.get(0))!=-1){
+                            borrarOverlaped(b.get(0),buscarYDeterminarLongitud(posComienzo,posFinal,b.get(0)));
+                        }
+                        //guardamos la posición de inicio y fin en listas
+                        posComienzo.add(b.get(0));
+                        posFinal.add(b.get(1));
+                        
+                    }
+        }
+    }
+    
+    
+    
+    public int buscarYDeterminarLongitud(ArrayList<Integer> posComienzo,ArrayList<Integer> posFinal, int posBuscada){
+        //hacemos una lista solo con las posiciones finales de los que buscamos que inician a la vez
+        //para asi posteriormente ver cual es el más largo de la lista
+        ArrayList<Integer> finalesBuscados= new ArrayList<>() ;
+        int contador=0;
+        int masLargo;
+        for(int i:posComienzo){
+            if(i==posBuscada){
+                finalesBuscados.add(posFinal.get(contador));
+            }
+            contador++;
+        }
+        
+        masLargo=finalesBuscados.indexOf(Collections.max(finalesBuscados));
+        return masLargo;
+        
+    }
+    
+    
+    public void borrarOverlaped(int posInicialBuscada,int posFinalBuena){
+        //una vez sabido la posición inicial del elemento que queremos borrar y la inicial y final del
+        //que queremos conservar, borramos todos los que inicien en esa posición y la pos final sea menor
+        int posArray1=0;
+    
+        for (ArrayList<ArrayList<Integer>> a: listasPosicionesValidas){
+                    int posArray2=0;
+                    for (ArrayList<Integer> b: a){
+                        
+                        if(b.get(0)==posInicialBuscada && b.get(1)<posFinalBuena){
+                            listasValidas.get(posArray1).remove(posArray2);
+                            listasPosicionesValidas.get(posArray1).remove(posArray2);
+                        }
+                        posArray2++;
+                    }
+            posArray1++;
+        }
+    }
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////   
+    
     
     public void organizarTokens(){
+        //pone en una lista, todos los tokens en orden de aparicion según la cadena original
         for(int posicion=0;posicion<cadena.length();posicion++){
             boolean flag=false;
             int contador=0;
             for(int n: posicionesErrores){
                 if(posicion==n && !flag){
+                    //si el token es un error
                     todoJunto.add(String.valueOf(errores.get(contador)));
-                    flag=true;
+                    flag=true; //hemos encontrado el token de la posicion querida
                 }
                 contador++;
             }
             
             if(!flag){
+                //miramos en las listas de tokens validos
                 int posArray1=0;
                 
-                for (ArrayList<ArrayList<Integer>> a: listasPosiciones){
+                for (ArrayList<ArrayList<Integer>> a: listasPosicionesValidas){
                     int posArray2=0;
                     for (ArrayList<Integer> b: a){
                         
                         if(b.get(0)==posicion){
                             todoJunto.add(listasValidas.get(posArray1).get(posArray2));
                             listasOrdenadasNumAutomata.add(listasNumAutomata.get(posArray1).get(posArray2));
-                            int desplazamiento=(listasPosiciones.get(posArray1).get(posArray2).get(1)-listasPosiciones.get(posArray1).get(posArray2).get(0));
+                            int desplazamiento=(listasPosicionesValidas.get(posArray1).get(posArray2).get(1)-listasPosicionesValidas.get(posArray1).get(posArray2).get(0));
                             posicion=posicion+desplazamiento; //le sumamos a i, el número de caracteres de la palabra aceptada
                         }
                         posArray2++;
@@ -134,6 +202,7 @@ public class ComprobadorTokens {
             }
         }
     }
+    
     
     public void imprimir(){
         int contadorBuenas=0;
