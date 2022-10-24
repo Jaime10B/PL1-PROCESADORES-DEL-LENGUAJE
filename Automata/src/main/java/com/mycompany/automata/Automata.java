@@ -19,9 +19,10 @@ public class Automata {
     private Matriz mz;
     private int numEstados;
     private int numAutomata;
+    private String dir;
 
-    public Automata(int modo, int nE, int numAut) {
-        mz = new Matriz();
+    public Automata(int modo, int nE, int numAut, String dir) {
+        mz = new Matriz(dir);
         estadosFinales = mz.getEstadosFinales();
         estados= new ArrayList<>();
         alfabeto= new ArrayList<>();
@@ -30,6 +31,7 @@ public class Automata {
         this.modo=modo;
         this.numEstados=nE;
         this.numAutomata=numAut;
+        this.dir=dir;
 
     }
 

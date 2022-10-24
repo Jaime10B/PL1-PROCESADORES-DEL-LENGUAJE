@@ -1,5 +1,8 @@
 package com.mycompany.automata;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -10,13 +13,15 @@ import java.util.HashMap;
 public class Matriz {
     
     int modo;
-        public ArrayList<Integer> estadosFinales;
-        public HashMap<Integer,HashMap<Character,Integer>> matriz;
+    private ArrayList<Integer> estadosFinales;
+    private HashMap<Integer,HashMap<Character,Integer>> matriz;
+    private String dir;
         
 
-    public Matriz() {
+    public Matriz(String dir) {
         estadosFinales = new ArrayList<>();
         matriz= new HashMap<>();
+        this.dir=dir;
     }
     
     
@@ -34,155 +39,102 @@ public class Matriz {
         //que pueda leer nuestro , cargaremos una matriz u otra
         switch(modo){
             case 0:
-                cargarMatriz1();
-                establecerQf1();
+                rellenarMatriz(dir);
+                encontrarEstadosFinales(dir);
                 break;
             case 1:
-                cargarMatrizLeer();
-                establecerQfLeer();
+                rellenarMatriz(dir);
+                encontrarEstadosFinales(dir);
                 break;
             case 2:
-                cargarMatrizReal();
-                establecerQfReal();
+                rellenarMatriz(dir);
+                encontrarEstadosFinales(dir);
                 break;
             case 3:
-                cargarMatrizHacer();
-                establecerQfHacer();
+                rellenarMatriz(dir);
+                encontrarEstadosFinales(dir);
                 break;
             
         }
     }
 
-    
-    
-    
-    
-    public void cargarMatriz1(){
-        matriz.get(0).put('a',1);
-        matriz.get(1).put('a',2);
-        matriz.get(1).put('b',3);
-        matriz.get(2).put('a',2);
-        matriz.get(2).put('b',3);
-        matriz.get(3).put('c',6);
-        matriz.get(3).put('m',7);
-        matriz.get(3).put('n',4);
-        matriz.get(3).put('o',5);
-        matriz.get(3).put('p',9);
-        matriz.get(3).put('q',8);
-        matriz.get(4).put('b',10);
-        matriz.get(5).put('b',10);
-        matriz.get(6).put('c',6);
-        matriz.get(6).put('m',7);
-        matriz.get(6).put('n',4);
-        matriz.get(6).put('o',5);
-        matriz.get(6).put('p',9);
-        matriz.get(6).put('q',8);
-        matriz.get(7).put('b',10);
-        matriz.get(8).put('b',10);
-        matriz.get(9).put('b',10);
-        matriz.get(10).put('c',13);
-        matriz.get(10).put('m',14);
-        matriz.get(10).put('n',11);
-        matriz.get(10).put('o',12);
-        matriz.get(10).put('p',16);
-        matriz.get(10).put('q',15);
-        matriz.get(11).put('b',10);
-        matriz.get(12).put('b',10);
-        matriz.get(13).put('c',13);
-        matriz.get(13).put('m',14);
-        matriz.get(13).put('n',11);
-        matriz.get(13).put('o',12);
-        matriz.get(13).put('p',16);
-        matriz.get(13).put('q',15);
-        matriz.get(14).put('b',10);
-        matriz.get(15).put('b',10);
-        matriz.get(16).put('b',10);
-    }
         
         
-    public void establecerQf1(){
-        estadosFinales.add(4);
-        estadosFinales.add(5);
-        estadosFinales.add(7);
-        estadosFinales.add(8);
-        estadosFinales.add(9);
-        estadosFinales.add(11);
-        estadosFinales.add(12);
-        estadosFinales.add(14);
-        estadosFinales.add(15);
-        estadosFinales.add(16);
+        
+    public void rellenarMatriz(String direc){
+        try{
+            BufferedReader buffer = new BufferedReader(new FileReader(direc));
+            String linea;
+            String lineaEstadoOrigen=null;
+            String lineaEstadoDestino=null;
+            String caracterPuente=null;
+            boolean encuentraFrom=false;
+            boolean encuentraTo=false;
+            boolean encuentraRead=false;
+            while((linea=buffer.readLine())!=null){ //mientras que no se acabe el archivo
+                if(linea.contains("from")){
+                    //si encontramos from, eliminamos todo de esa línea menos el número, 
+                    //que será el estado de origen, para luego cogerlo fácilmente
+                    linea= linea.replace("			<from>","");
+                    lineaEstadoOrigen=linea.replace("</from>&#13;","");
+                    encuentraFrom=true;
+                }
+                if(linea.contains("to")){
+                    linea=linea.replace("			<to>","");
+                    lineaEstadoDestino=linea.replace("</to>&#13;","");
+                    encuentraTo=true;
+                }
+                if(linea.contains("read")){
+                    linea=linea.replace("			<read>","");
+                    caracterPuente=linea.replace("</read>&#13;","");
+                    encuentraRead=true;
+                }
+                if(encuentraFrom&&encuentraRead&&encuentraTo){
+                    //si ya ha encontrado las 3 etiquetas, significa que ya estamos listos para coger sus valores
+                    matriz.get(Integer.valueOf(lineaEstadoOrigen)).put(caracterPuente.charAt(0),Integer.valueOf(lineaEstadoDestino));
+                    encuentraFrom=false;
+                    encuentraTo=false;
+                    encuentraRead=false;
+                }
+                
+            }
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
     }
     
     
-    public void cargarMatrizLeer(){
-        matriz.get(0).put('l',1);
-        matriz.get(0).put('L',2);
-        matriz.get(1).put('e',4);
-        matriz.get(1).put('E',3);
-        matriz.get(2).put('e',4);
-        matriz.get(2).put('E',3);
-        matriz.get(3).put('e',6);
-        matriz.get(3).put('E',5);
-        matriz.get(4).put('e',6);
-        matriz.get(4).put('E',5);
-        matriz.get(5).put('r',7);
-        matriz.get(5).put('R',8);
-        matriz.get(6).put('r',7);
-        matriz.get(6).put('R',8);
+    public void encontrarEstadosFinales(String direc){
+        try{
+            BufferedReader buffer = new BufferedReader(new FileReader(direc));
+            String linea1;
+            String linea2=null;
+            String linea3=null;
+            String linea4=null;
+            String linea5=null;
+            String estado=null;
+            
+
+            while((linea1=buffer.readLine())!=null){ //mientras que no se acabe el archivo
+                if(linea1.contains("final")){
+                    //si hemos encontrado una línea que ponga final, 4 lineas antes dice el número de dicho estado final
+                    //preparamos la línea para que en ella se quede sólo el número
+                    linea5= linea5.replace("		<state id=\"","");
+                    linea5=linea5.replace("\" name=\"q","");
+                    estado=linea5.replace("\">&#13;","");
+                    
+                    //como ahora tenemos el número 2 veces, debemos eliminarlo una vez
+                    estado= estado.substring(estado.length()/2, estado.length());
+                    estadosFinales.add(Integer.valueOf(estado));
+                }
+                linea5=linea4;
+                linea4=linea3;
+                linea3=linea2;
+                linea2=linea1;
+            }
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
     }
-    
-    public void establecerQfLeer(){
-        estadosFinales.add(7);
-        estadosFinales.add(8);
-    }
-    
-    public void cargarMatrizReal(){
-        matriz.get(0).put('r',1);
-        matriz.get(0).put('R',2);
-        matriz.get(1).put('e',4);
-        matriz.get(1).put('E',3);
-        matriz.get(2).put('e',4);
-        matriz.get(2).put('E',3);
-        matriz.get(3).put('a',5);
-        matriz.get(3).put('A',6);
-        matriz.get(4).put('a',5);
-        matriz.get(4).put('A',6);
-        matriz.get(5).put('l',7);
-        matriz.get(5).put('L',8);
-        matriz.get(6).put('l',7);
-        matriz.get(6).put('L',8);
-    }
-    
-    public void establecerQfReal(){
-        estadosFinales.add(7);
-        estadosFinales.add(8);
-    }
-    
-    public void cargarMatrizHacer(){
-        matriz.get(0).put('h',2);
-        matriz.get(0).put('H',1);
-        matriz.get(1).put('a',3);
-        matriz.get(1).put('A',4);
-        matriz.get(2).put('a',3);
-        matriz.get(2).put('A',4);
-        matriz.get(3).put('c',6);
-        matriz.get(3).put('C',5);
-        matriz.get(4).put('c',6);
-        matriz.get(4).put('C',5);
-        matriz.get(5).put('e',7);
-        matriz.get(5).put('E',8);
-        matriz.get(6).put('e',7);
-        matriz.get(6).put('E',8);
-        matriz.get(7).put('r',10);
-        matriz.get(7).put('R',9);
-        matriz.get(8).put('r',10);
-        matriz.get(8).put('R',9);
-    }
-    
-    public void establecerQfHacer(){
-        estadosFinales.add(9);
-        estadosFinales.add(10);
-    }
-    
     
 }
