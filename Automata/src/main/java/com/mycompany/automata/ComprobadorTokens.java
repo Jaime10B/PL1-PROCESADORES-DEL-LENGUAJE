@@ -10,8 +10,8 @@ public class ComprobadorTokens {
     private ArrayList<ArrayList<String>> listasValidas;
     private ArrayList<ArrayList<Integer>> listasBooleanos;
     private ArrayList<ArrayList<ArrayList<Integer>>> listasPosicionesValidas;
-    private ArrayList<ArrayList<Integer>> listasNumAutomata;
-    private ArrayList<Integer> listasOrdenadasNumAutomata;
+    private ArrayList<ArrayList<String>> listasNumAutomata;
+    private ArrayList<String> listasOrdenadasNumAutomata;
     private ArrayList<Character> errores;
     private ArrayList<Integer> posicionesErrores;
     private ArrayList<String> validas;
@@ -53,7 +53,7 @@ public class ComprobadorTokens {
         
     }
     
-    public void añadirAListasNumAutomata(ArrayList<Integer> lista) {
+    public void añadirAListasNumAutomata(ArrayList<String> lista) {
         if(!lista.isEmpty()){
             listasNumAutomata.add(lista);
         }
@@ -72,13 +72,13 @@ public class ComprobadorTokens {
             definirPosicionesErrores();
             detectarOverlapping();
             organizarTokens();
-//            System.out.println(listasValidas);
-//            System.out.println(listasPosicionesValidas);
-//            System.out.println(listasNumAutomata);
-//            System.out.println(listasBooleanos);
-//            System.out.println(errores);
-//            System.out.println(posicionesErrores);
-//            System.out.println(todoJunto); 
+//            System.out.println("lista validas "+listasValidas);
+//            System.out.println("lista posiciones validas "+listasPosicionesValidas);
+//            System.out.println("lista numAutomata "+listasNumAutomata);
+//            System.out.println("lista booleanos "+listasBooleanos);
+//            System.out.println("lista errores "+errores);
+//            System.out.println("lista posiciones errores "+posicionesErrores);
+//            System.out.println("lista todo junto "+todoJunto); 
 //            System.out.println(listasOrdenadasNumAutomata);
             imprimir();
         }
@@ -211,7 +211,7 @@ public class ComprobadorTokens {
                 System.out.println("<"+s+", ERROR>");
             }
             else{
-                System.out.println("<"+s+", M"+listasOrdenadasNumAutomata.get(contadorBuenas)+">");
+                System.out.println("<"+s+", "+listasOrdenadasNumAutomata.get(contadorBuenas)+">");
                 contadorBuenas++;
             }
         }

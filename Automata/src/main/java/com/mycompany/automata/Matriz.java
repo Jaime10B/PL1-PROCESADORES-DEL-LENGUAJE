@@ -12,16 +12,13 @@ import java.util.HashMap;
  */
 public class Matriz {
     
-    int modo;
     private ArrayList<Integer> estadosFinales;
     private HashMap<Integer,HashMap<Character,Integer>> matriz;
-    private String dir;
         
 
-    public Matriz(String dir) {
+    public Matriz() {
         estadosFinales = new ArrayList<>();
         matriz= new HashMap<>();
-        this.dir=dir;
     }
     
     
@@ -34,28 +31,10 @@ public class Matriz {
     }
     
     
-    public void eleccionDeModo(int modo){
-        //dependiendo del apartado en que nos encontremos y los que queramos 
-        //que pueda leer nuestro , cargaremos una matriz u otra
-        switch(modo){
-            case 0:
-                rellenarMatriz(dir);
-                encontrarEstadosFinales(dir);
-                break;
-            case 1:
-                rellenarMatriz(dir);
-                encontrarEstadosFinales(dir);
-                break;
-            case 2:
-                rellenarMatriz(dir);
-                encontrarEstadosFinales(dir);
-                break;
-            case 3:
-                rellenarMatriz(dir);
-                encontrarEstadosFinales(dir);
-                break;
-            
-        }
+    public void cargarDatos(String dir){
+        rellenarMatriz(dir);
+        System.out.println(matriz);
+        encontrarEstadosFinales(dir);
     }
 
         
@@ -112,6 +91,7 @@ public class Matriz {
             String linea3=null;
             String linea4=null;
             String linea5=null;
+            String linea6=null;
             String estado=null;
             
 
@@ -119,14 +99,27 @@ public class Matriz {
                 if(linea1.contains("final")){
                     //si hemos encontrado una línea que ponga final, 4 lineas antes dice el número de dicho estado final
                     //preparamos la línea para que en ella se quede sólo el número
-                    linea5= linea5.replace("		<state id=\"","");
-                    linea5=linea5.replace("\" name=\"q","");
-                    estado=linea5.replace("\">&#13;","");
+                    if (!linea2.contains("initial")) {
+                        linea5= linea5.replace("		<state id=\"","");
+                        linea5=linea5.replace("\" name=\"q","");
+                        estado=linea5.replace("\">&#13;","");
+
+                        //como ahora tenemos el número 2 veces, debemos eliminarlo una vez
+                        estado= estado.substring(estado.length()/2, estado.length());
+                        estadosFinales.add(Integer.valueOf(estado));
+                    }else{
+                        linea6= linea6.replace("		<state id=\"","");
+                        linea6=linea6.replace("\" name=\"q","");
+                        estado=linea6.replace("\">&#13;","");
+
+                        //como ahora tenemos el número 2 veces, debemos eliminarlo una vez
+                        estado= estado.substring(estado.length()/2, estado.length());
+                        System.out.println(estado);
+                        estadosFinales.add(Integer.valueOf(estado));
+                    }
                     
-                    //como ahora tenemos el número 2 veces, debemos eliminarlo una vez
-                    estado= estado.substring(estado.length()/2, estado.length());
-                    estadosFinales.add(Integer.valueOf(estado));
                 }
+                linea6=linea5;
                 linea5=linea4;
                 linea4=linea3;
                 linea3=linea2;

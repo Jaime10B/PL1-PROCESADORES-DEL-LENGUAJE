@@ -18,11 +18,11 @@ public class Automata {
     private int modo;
     private Matriz mz;
     private int numEstados;
-    private int numAutomata;
+    private String numAutomata;
     private String dir;
 
-    public Automata(int modo, int nE, int numAut, String dir) {
-        mz = new Matriz(dir);
+    public Automata(int modo, int nE, String numAut, String dir) {
+        mz = new Matriz();
         estadosFinales = mz.getEstadosFinales();
         estados= new ArrayList<>();
         alfabeto= new ArrayList<>();
@@ -35,7 +35,7 @@ public class Automata {
 
     }
 
-    public int getNumAutomata() {
+    public String getNumAutomata() {
         return numAutomata;
     }
 
@@ -52,7 +52,7 @@ public class Automata {
     
     
     public void cargarEstados(){
-        for( int i=0; i<numEstados;i++){
+        for( int i=0; i<=numEstados;i++){
             this.estados.add(i);
         }
     }
@@ -89,7 +89,8 @@ public class Automata {
         cargarAlfabeto();
         cargarEstados();
         iniciarMatriz();
-        mz.eleccionDeModo(modo); //cargamos la matriz y los estados finales
+        mz.cargarDatos(dir); //cargamos la matriz y los estados finales
+        
     }
     
 }

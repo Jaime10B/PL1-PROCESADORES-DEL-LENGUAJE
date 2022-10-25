@@ -14,10 +14,9 @@ public class Maquina {
     private ArrayList<Integer> listaBooleanos;
     private boolean enviadas;
     private ComprobadorTokens comp;
-    private ArrayList<Integer> listaNumAut;
+    private ArrayList<String> listaNumAut;
     private ArrayList<ArrayList<Integer>> listaPosChar;
-
-    private int numAut;
+    private String numAut;
     private int posicionChar;
     private String cadenaM;
 
@@ -45,14 +44,13 @@ public class Maquina {
         return afd.isFinal(estadoActual);
     }
     
-    public boolean acepta(char caracter, boolean bool){
+    public boolean acepta(Character caracter, boolean bool){
         //devuelve un booleano que nos indica si el caracter recibido por parámetro
         //es válido y coherente con lo anterior
         // tiene dos modos, si bool es false tan sólo comprueba si el siguiente caracter
         // sería congruente con la cadena, pero si bool es true, ademas en caso de ser congruente
         //cambia el estado actual ya que reconoce el caracter
         Integer estadoTemporal= afd.getSiguienteEstado(caracter, estadoActual);
-        
         if(bool){
             if(estadoTemporal!=null){
                 estadoActual=estadoTemporal;
@@ -91,11 +89,11 @@ public class Maquina {
                             listaBooleanos.add(0);
                         }
                     }
-                    preparacionCadena(cadena.substring(contador_errores, cadena.length()));
+                    preparacionCadena(cadena.substring(contador_errores, cadena.length()),false);
                     return;
                 }
                 
-                if (isFinal()){
+                if (isFinal()&& !acepta(cadena.toCharArray()[contador],false)){ //para que no me de index out of range aqui, añadi el $
                     validas.add(cadena.substring(0, contador));
                     listaNumAut.add(numAut);
                     intermedio.add(posicionChar);
@@ -115,8 +113,8 @@ public class Maquina {
                 }
                 
                 
-                if(valida && contador<cadena.length() && contador<cadena.length() && !acepta(cadena.toCharArray()[contador],false) ){
-                    preparacionCadena(cadena.substring(contador, cadena.length()));
+                if(valida && contador<cadena.length() && !acepta(cadena.toCharArray()[contador],false) ){
+                    preparacionCadena(cadena.substring(contador, cadena.length()),false);
                     break;
                 } 
                 
@@ -143,10 +141,16 @@ public class Maquina {
     
     
     
-    public void preparacionCadena(String cadena){
+    public void preparacionCadena(String cadena, boolean primeraVez){
         //esta función será la encargada de detectar la gran mayoría de caracteres no válidos.
         //si encuentra algún caracter válido, lo delega en compruebaCadenaBuena
-        
+        if (primeraVez) {
+            // la primera vez que llamamos a la función, le añado un signo que no vaya a detectar ningun automata
+            //al final de la cadena para que si intento comprobar si el siguiente caracter es valido y la cadena se ha acabado ya,
+            //no me salte error, esto es para el if de la linea 100
+            cadena=cadena+"$";
+            primeraVez=false;
+        }
         inicializar();
         if(cadenaM==null){
             cadenaM=cadena; //para pasarle luego la cadena a la clase ComprobadorTokens
@@ -155,11 +159,19 @@ public class Maquina {
         if(cadena.length()>0){
             if(this.acepta(cadena.toCharArray()[0],true)){compruebaCadenaBuena(cadena);}
             else{
-                posicionChar++;
-                listaBooleanos.add(0);
-                if (cadena.length()>1){
-                    preparacionCadena(cadena.substring(1, cadena.length()));
+                if(!"$".equals(cadena)){
+                    posicionChar++;
+                    listaBooleanos.add(0);
+                    if (cadena.length()>1){
+                        preparacionCadena(cadena.substring(1, cadena.length()),false);
+                    }
+                }else{
+                    if (!enviadas){
+                        enviarListas();
+                        enviadas=true;
+                    }
                 }
+                
             }        
         }   
     }
@@ -200,8 +212,7 @@ public class Maquina {
         //dependiendo del apartado del ejercicio para el que la cadena sea válida
         switch (afd.getModo()) {
                 case 0 -> apartadoUnoCompruebaCadena(cadena);
-                case 1,2,3 -> preparacionCadena(cadena);
-                //case 4 -> ;//aun no he llegado
+                default -> preparacionCadena(cadena,true);
             }
     }
     
