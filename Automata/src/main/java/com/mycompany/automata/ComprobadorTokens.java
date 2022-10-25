@@ -17,6 +17,9 @@ public class ComprobadorTokens {
     private ArrayList<String> validas;
     private String cadena;
     private ArrayList<String> todoJunto;
+    private ArrayList<ArrayList<Character>> listasAlfabetos;
+    private ArrayList<String> alfabeto;
+    private ArrayList<Boolean> error_o_valida; //lista que va a estar igual ordenada que todoJunto, diciendo si cada posicion es valida o no
 
     public ComprobadorTokens() {
         listasValidas= new ArrayList<>();
@@ -28,6 +31,9 @@ public class ComprobadorTokens {
         errores= new ArrayList<>();
         validas= new ArrayList<>();
         posicionesErrores= new ArrayList<>();
+        listasAlfabetos= new ArrayList<>();
+        alfabeto= new ArrayList<>();
+        error_o_valida= new ArrayList<>();
     }
 
 
@@ -60,9 +66,26 @@ public class ComprobadorTokens {
         
     }
     
+    public void añadirAlfabeto(ArrayList<Character> lista) {
+        if(!lista.isEmpty()){
+            listasAlfabetos.add(lista);
+        }
+        
+    }
+    
     public void añadirCadena(String c) {
         cadena=c;
         
+    }
+    
+    public void juntarAlfabetos(){
+        for(ArrayList<Character> a: listasAlfabetos){
+            for (Character c: a){
+                if(!alfabeto.contains(String.valueOf(c))){
+                    alfabeto.add(String.valueOf(c));
+                }
+            }
+        }
     }
     
 
@@ -79,6 +102,8 @@ public class ComprobadorTokens {
 //            System.out.println("lista errores "+errores);
 //            System.out.println("lista posiciones errores "+posicionesErrores);
 //            System.out.println("lista todo junto "+todoJunto); 
+//            System.out.println("lista error_o_valida "+ error_o_valida);
+            System.out.println("listas alfabetos"+listasAlfabetos);
 //            System.out.println(listasOrdenadasNumAutomata);
             imprimir();
         }
@@ -176,6 +201,7 @@ public class ComprobadorTokens {
                 if(posicion==n && !flag){
                     //si el token es un error
                     todoJunto.add(String.valueOf(errores.get(contador)));
+                    error_o_valida.add(false);
                     flag=true; //hemos encontrado el token de la posicion querida
                 }
                 contador++;
@@ -191,6 +217,7 @@ public class ComprobadorTokens {
                         
                         if(b.get(0)==posicion){
                             todoJunto.add(listasValidas.get(posArray1).get(posArray2));
+                            error_o_valida.add(true);
                             listasOrdenadasNumAutomata.add(listasNumAutomata.get(posArray1).get(posArray2));
                             int desplazamiento=(listasPosicionesValidas.get(posArray1).get(posArray2).get(1)-listasPosicionesValidas.get(posArray1).get(posArray2).get(0));
                             posicion=posicion+desplazamiento; //le sumamos a i, el número de caracteres de la palabra aceptada
@@ -205,14 +232,23 @@ public class ComprobadorTokens {
     
     
     public void imprimir(){
+        juntarAlfabetos();
+        System.out.println("Alfab"+alfabeto);
         int contadorBuenas=0;
-        for(String s: todoJunto){
-            if(s.length()==1){
-                System.out.println("<"+s+", ERROR>");
+        
+        for (int i = 0; i < todoJunto.size(); i++) {
+            if(error_o_valida.get(i)){
+                System.out.println("<"+todoJunto.get(i)+", "+listasOrdenadasNumAutomata.get(contadorBuenas)+">");
+                contadorBuenas++;
             }
             else{
-                System.out.println("<"+s+", "+listasOrdenadasNumAutomata.get(contadorBuenas)+">");
-                contadorBuenas++;
+                if (alfabeto.contains(todoJunto.get(i))) {
+                    System.out.println("<"+todoJunto.get(i)+", ERROR>");
+                }
+                else{
+                    System.out.println("<"+todoJunto.get(i)+", NO PERTENECE AL ALFABETO>");
+                }
+                
             }
         }
     }

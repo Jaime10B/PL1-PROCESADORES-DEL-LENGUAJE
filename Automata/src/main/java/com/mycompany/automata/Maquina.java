@@ -19,6 +19,7 @@ public class Maquina {
     private String numAut;
     private int posicionChar;
     private String cadenaM;
+    private ArrayList<Character> alfabeto;
 
     public Maquina(Automata afd, ComprobadorTokens comp) {
         this.afd=afd;
@@ -32,6 +33,8 @@ public class Maquina {
         posicionChar=0;
         numAut=afd.getNumAutomata();
         cadenaM=null;
+        alfabeto= afd.getAlfabeto();
+        
     }
     
     
@@ -183,6 +186,7 @@ public class Maquina {
         comp.añadirAListasNumAutomata(listaNumAut);
         comp.añadirAListasPosiciones(listaPosChar);
         comp.añadirCadena(cadenaM);
+        comp.añadirAlfabeto(alfabeto);
         
     }
     
