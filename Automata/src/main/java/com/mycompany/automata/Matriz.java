@@ -33,7 +33,6 @@ public class Matriz {
     
     public void cargarDatos(String dir){
         rellenarMatriz(dir);
-        System.out.println(matriz);
         encontrarEstadosFinales(dir);
     }
 

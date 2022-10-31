@@ -18,7 +18,7 @@ public class Automata {
     private int modo;
     private Matriz mz;
     private int numEstados;
-    private String numAutomata;
+    private String nombreAutomata;
     private String dir;
 
     public Automata(int modo, int nE, String numAut, String dir) {
@@ -30,13 +30,13 @@ public class Automata {
         estadoInicial = 0;
         this.modo=modo;
         this.numEstados=nE;
-        this.numAutomata=numAut;
+        this.nombreAutomata=numAut;
         this.dir=dir;
 
     }
 
-    public String getNumAutomata() {
-        return numAutomata;
+    public String getNombreAutomata() {
+        return nombreAutomata;
     }
 
     public int getModo() {
@@ -105,8 +105,8 @@ public class Automata {
     }
     
     public void alfabetoStr(){
-        alfabeto.add('"');
-        alfabeto.add('\'');
+        alfabeto.add('’');
+        alfabeto.add('“');
         for (char c='a';c<='z';c++){
             alfabeto.add(c);
         }

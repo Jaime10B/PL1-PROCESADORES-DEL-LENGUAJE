@@ -10,16 +10,16 @@ import java.util.ArrayList;
 public class Maquina {
     private int estadoActual;
     private Automata afd;
-    private ArrayList<String> validas;
-    private ArrayList<Integer> listaBooleanos;
+    private ArrayList<String> validas; // array con las palabras válidas detectadas
+    private ArrayList<Integer> listaBooleanos; //por cada caracter, guardará en orden un 0 si no lo detecta y un 1 si forma parte de una palabra válida
     private boolean enviadas;
     private ComprobadorTokens comp;
-    private ArrayList<String> listaNumAut;
-    private ArrayList<ArrayList<Integer>> listaPosChar;
-    private String numAut;
+    private ArrayList<String> listaNombresAut; //cada vez que esta máquina detecte una palabra válida, guardará en la lista el nombre del autómata que la detectó
+    private ArrayList<ArrayList<Integer>> listaPosChar; // se guardarán listas con la posición del primer y último caracter de la palabra detectada como válida.
+    private String nombreAut; 
     private int posicionChar;
-    private String cadenaM;
-    private ArrayList<Character> alfabeto;
+    private String cadenaM; //para hacer una copia de la cadena y pasarsela a la clase ComprobadorTokens
+    private ArrayList<Character> alfabeto; //array con todas las letras del alfabeto de la ER que puede detectar.
 
     public Maquina(Automata afd, ComprobadorTokens comp) {
         this.afd=afd;
@@ -27,11 +27,11 @@ public class Maquina {
         this.comp=comp;
         validas= new ArrayList<>();
         listaBooleanos= new ArrayList<>();
-        listaNumAut= new ArrayList<>();
+        listaNombresAut= new ArrayList<>();
         listaPosChar= new ArrayList<>();
         enviadas=false;
         posicionChar=0;
-        numAut=afd.getNumAutomata();
+        nombreAut=afd.getNombreAutomata();
         cadenaM=null;
         alfabeto= afd.getAlfabeto();
         
@@ -74,7 +74,6 @@ public class Maquina {
         //si en algún momento encuentra un caracter erróneo, delega en preparacionCadena
         //También envía las listas a la clase ComprobadorTokens, una vez que estas están ya completas.
         inicializar();
-        boolean valida=false;
         int contador=0;
         int contador_errores=0;
         ArrayList<Integer> intermedio= new ArrayList<>();
@@ -85,20 +84,19 @@ public class Maquina {
                 if(this.acepta(c,true)){contador++;}
 
                 else{
-                    if(!valida){
-                        for(char x:((cadena.substring(0, contador)).toCharArray())){
-                            contador_errores++;
-                            posicionChar++;
-                            listaBooleanos.add(0);
-                        }
+                    for(char x:((cadena.substring(0, contador)).toCharArray())){
+                        contador_errores++;
+                        posicionChar++;
+                        listaBooleanos.add(0);
                     }
+                    
                     preparacionCadena(cadena.substring(contador_errores, cadena.length()),false);
                     return;
                 }
                 
                 if (isFinal()&& !acepta(cadena.toCharArray()[contador],false)){ //para que no me de index out of range aqui, añadi el $
                     validas.add(cadena.substring(0, contador));
-                    listaNumAut.add(numAut);
+                    listaNombresAut.add(nombreAut);
                     intermedio.add(posicionChar);
                     for(int i=0;i<contador;i++){
                         posicionChar++;
@@ -112,28 +110,12 @@ public class Maquina {
                     listaPosChar.add(copia);
                     intermedio.remove(0);
                     intermedio.remove(0);
-                    valida=true;
-                }
-                
-                
-                if(valida && contador<cadena.length() && !acepta(cadena.toCharArray()[contador],false) ){
                     preparacionCadena(cadena.substring(contador, cadena.length()),false);
                     break;
-                } 
-                
+                }
             }     
         }
         
-        if ((contador>0)&&(!valida)){
-         //Para el caso de que al final de la cadena acepte un par de letras pero no lleguen a formar ningun token 
-        //válido, como no ha fallado, no las añadiría a errores sin este if
-        
-            for(char x:((cadena.substring(0, contador)).toCharArray())){
-                contador_errores++;
-                posicionChar++;
-                listaBooleanos.add(0);
-            }
-        }
         
         if (!enviadas){
             enviarListas();
@@ -183,7 +165,7 @@ public class Maquina {
     public void enviarListas(){
         comp.añadirAListasValidas(validas);
         comp.añadirAListasBooleanos(listaBooleanos);
-        comp.añadirAListasNumAutomata(listaNumAut);
+        comp.añadirAListasNombreAutomata(listaNombresAut);
         comp.añadirAListasPosiciones(listaPosChar);
         comp.añadirCadena(cadenaM);
         comp.añadirAlfabeto(alfabeto);
@@ -198,7 +180,9 @@ public class Maquina {
             
             for(char c:cadena.toCharArray()){
                 longitud++;
-                this.acepta(c,true);
+                if(!this.acepta(c,true)){
+                    break;
+                }
                 
                 if(longitud==cadena.length() && isFinal() ){
                     valida=true;
@@ -213,9 +197,13 @@ public class Maquina {
     
     public void direccionarApartado(String cadena){
         //en este método redireccionaremos la cadena a una función u otra
-        //dependiendo del apartado del ejercicio para el que la cadena sea válida
+        //dependiendo del apartado del ejercicio 
         switch (afd.getModo()) {
-                case 0 -> apartadoUnoCompruebaCadena(cadena);
+                case 0 -> { 
+                    apartadoUnoCompruebaCadena(cadena);
+                    preparacionCadena(cadena,true);
+            }
+                    
                 default -> preparacionCadena(cadena,true);
             }
     }

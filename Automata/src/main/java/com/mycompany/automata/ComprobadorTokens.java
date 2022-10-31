@@ -7,26 +7,26 @@ import java.util.Collections;
 
 public class ComprobadorTokens {
     
-    private ArrayList<ArrayList<String>> listasValidas;
-    private ArrayList<ArrayList<Integer>> listasBooleanos;
-    private ArrayList<ArrayList<ArrayList<Integer>>> listasPosicionesValidas;
-    private ArrayList<ArrayList<String>> listasNumAutomata;
-    private ArrayList<String> listasOrdenadasNumAutomata;
+    private ArrayList<ArrayList<String>> listasValidas; // lista de las listas de palabras válidas que recibe
+    private ArrayList<ArrayList<Integer>> listasBooleanos; // lista de las listas de booleanos que recibe
+    private ArrayList<ArrayList<ArrayList<Integer>>> listasPosicionesValidas; //lista de listas con las posiciones de los caracteres inicial y final de las palabras válidas
+    private ArrayList<ArrayList<String>> listasNombreAutomata;
+    private ArrayList<String> listasOrdenadasNombreAutomata;
     private ArrayList<Character> errores;
     private ArrayList<Integer> posicionesErrores;
     private ArrayList<String> validas;
-    private String cadena;
-    private ArrayList<String> todoJunto;
-    private ArrayList<ArrayList<Character>> listasAlfabetos;
-    private ArrayList<String> alfabeto;
+    private ArrayList<String> todoJunto; //lista ordenada por orden de aparición con los errores y las palabras válidas
+    private ArrayList<ArrayList<Character>> listasAlfabetos; //lista de listas con los alfabetos de todos los autómatas
+    private ArrayList<String> alfabeto; //alfabeto común, recogido de juntar todos los alfabetos
     private ArrayList<Boolean> error_o_valida; //lista que va a estar igual ordenada que todoJunto, diciendo si cada posicion es valida o no
+    private String cadena;
 
     public ComprobadorTokens() {
         listasValidas= new ArrayList<>();
         listasBooleanos= new ArrayList<>();
         listasPosicionesValidas= new ArrayList<>();
-        listasNumAutomata= new ArrayList<>();
-        listasOrdenadasNumAutomata= new ArrayList<>();
+        listasNombreAutomata= new ArrayList<>();
+        listasOrdenadasNombreAutomata= new ArrayList<>();
         todoJunto= new ArrayList<>();
         errores= new ArrayList<>();
         validas= new ArrayList<>();
@@ -59,9 +59,9 @@ public class ComprobadorTokens {
         
     }
     
-    public void añadirAListasNumAutomata(ArrayList<String> lista) {
+    public void añadirAListasNombreAutomata(ArrayList<String> lista) {
         if(!lista.isEmpty()){
-            listasNumAutomata.add(lista);
+            listasNombreAutomata.add(lista);
         }
         
     }
@@ -93,7 +93,7 @@ public class ComprobadorTokens {
     public void verListas(){
         if(!listasBooleanos.isEmpty()){
             definirPosicionesErrores();
-            detectarOverlapping();
+            detectarOverlapping(); 
             organizarTokens();
 //            System.out.println("lista validas "+listasValidas);
 //            System.out.println("lista posiciones validas "+listasPosicionesValidas);
@@ -103,7 +103,7 @@ public class ComprobadorTokens {
 //            System.out.println("lista posiciones errores "+posicionesErrores);
 //            System.out.println("lista todo junto "+todoJunto); 
 //            System.out.println("lista error_o_valida "+ error_o_valida);
-            System.out.println("listas alfabetos"+listasAlfabetos);
+//            System.out.println("listas alfabetos"+listasAlfabetos);
 //            System.out.println(listasOrdenadasNumAutomata);
             imprimir();
         }
@@ -218,7 +218,7 @@ public class ComprobadorTokens {
                         if(b.get(0)==posicion){
                             todoJunto.add(listasValidas.get(posArray1).get(posArray2));
                             error_o_valida.add(true);
-                            listasOrdenadasNumAutomata.add(listasNumAutomata.get(posArray1).get(posArray2));
+                            listasOrdenadasNombreAutomata.add(listasNombreAutomata.get(posArray1).get(posArray2));
                             int desplazamiento=(listasPosicionesValidas.get(posArray1).get(posArray2).get(1)-listasPosicionesValidas.get(posArray1).get(posArray2).get(0));
                             posicion=posicion+desplazamiento; //le sumamos a i, el número de caracteres de la palabra aceptada
                         }
@@ -233,12 +233,11 @@ public class ComprobadorTokens {
     
     public void imprimir(){
         juntarAlfabetos();
-        System.out.println("Alfab"+alfabeto);
         int contadorBuenas=0;
         
         for (int i = 0; i < todoJunto.size(); i++) {
             if(error_o_valida.get(i)){
-                System.out.println("<"+todoJunto.get(i)+", "+listasOrdenadasNumAutomata.get(contadorBuenas)+">");
+                System.out.println("<"+todoJunto.get(i)+", "+listasOrdenadasNombreAutomata.get(contadorBuenas)+">");
                 contadorBuenas++;
             }
             else{
